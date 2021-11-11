@@ -31,5 +31,22 @@ export class BackendStack extends cdk.Stack {
         KEY_IN_SECRET_NAME: "SecretKey",
       },
     });
+
+    secret.addRotationSchedule("RotationSchedule", {
+      rotationLambda: lambdaFn,
+    });
+
+    secret.grantRead(lambdaFn);
+
+    lambdaFn.grantInvoke(
+      new iam.ServicePrincipal("secretsmanager.amazonaws.com")
+    );
+
+    lambdaFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        resources: [secret.secretArn],
+        actions: ["secretsmanager:PutSecretValue"],
+      })
+    );
   }
 }
